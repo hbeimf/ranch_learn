@@ -27,6 +27,7 @@
 -export([system_continue/3]).
 -export([system_terminate/4]).
 -export([system_code_change/4]).
+-include("log.hrl").
 
 -type conn_type() :: worker | supervisor.
 -type shutdown() :: brutal_kill | timeout().

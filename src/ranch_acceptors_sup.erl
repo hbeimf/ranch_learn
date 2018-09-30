@@ -17,6 +17,7 @@
 
 -export([start_link/2]).
 -export([init/1]).
+-include("log.hrl").
 
 -spec start_link(ranch:ref(), module())
 	-> {ok, pid()}.
@@ -53,6 +54,44 @@ init([Ref, Transport]) ->
 			LSocket, Transport, Logger, ConnsSup
 		]}, permanent, brutal_kill, worker, []}
 			|| N <- lists:seq(1, NumAcceptors)],
+
+	?LOG(Procs),
+
+	% [{{acceptor,<0.53.0>,1},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,2},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,3},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,4},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,5},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,6},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,7},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,8},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,9},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]},
+	%  {{acceptor,<0.53.0>,10},
+	%   {ranch_acceptor,start_link,[#Port<0.978>,ranch_tcp,error_logger,<0.52.0>]},
+	%   permanent,brutal_kill,worker,[]}]
+
+	%% 从打印来看， 这里应该 是启动了 5个监听 进程 ， 
+	%% 这之前出来的进程 就是监工{supervisor}， 真正的办工仔 {worker} 就快出现了， ^_^
+	%% 现在就先去看下 {ranch_acceptor} 这个接受请求的进程吧，
+
 	{ok, {{one_for_one, 1, 5}, Procs}}.
 
 -spec listen_error(any(), module(), any(), atom(), module()) -> no_return().
