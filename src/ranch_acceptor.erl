@@ -32,6 +32,8 @@ loop(LSocket, Transport, Logger, ConnsSup) ->
 				ok ->
 					%% This call will not return until process has been started
 					%% AND we are below the maximum number of connections.
+					
+					%% 将连接外包出去  ， 让别的进程 来处理连接 完之后的事情。
 					ranch_conns_sup:start_protocol(ConnsSup, CSocket);
 				{error, _} ->
 					Transport:close(CSocket)
