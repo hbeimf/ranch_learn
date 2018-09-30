@@ -70,6 +70,8 @@ start_link(Ref, Transport, Protocol) ->
 %% continue.
 -spec start_protocol(pid(), inet:socket()) -> ok.
 start_protocol(SupPid, Socket) ->
+	%% 当建立连接成功后第一时间来到了这里。
+	%% SubPid  = self() 
 	SupPid ! {?MODULE, start_protocol, self(), Socket},
 	receive SupPid -> ok end.
 
@@ -115,10 +117,20 @@ init(Parent, Ref, Transport, Protocol) ->
 loop(State=#state{parent=Parent, ref=Ref, conn_type=ConnType,
 		transport=Transport, protocol=Protocol, opts=Opts,
 		max_conns=MaxConns, logger=Logger}, CurConns, NbChildren, Sleepers) ->
+
+	?LOG(State),
+	% ==========log========{ranch_conns_sup,121}==============
+	% {state,<0.51.0>,tcp_echo,worker,5000,ranch_tcp,test_handler,[],5000,1024,
+	%        error_logger}
+
+
 	receive
 		{?MODULE, start_protocol, To, Socket} ->
 			try Protocol:start_link(Ref, Socket, Transport, Opts) of
 				{ok, Pid} ->
+					%% Socket 连接句柄在这里就出来了，
+					%%  去了我们传递进来的 test_handler 模块启动的进程 ，
+					%%  把业务逻辑交给真正需要处理逻辑的人。
 					handshake(State, CurConns, NbChildren, Sleepers, To, Socket, Pid, Pid);
 				{ok, SupPid, ProtocolPid} when ConnType =:= supervisor ->
 					handshake(State, CurConns, NbChildren, Sleepers, To, Socket, SupPid, ProtocolPid);
