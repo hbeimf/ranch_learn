@@ -45,6 +45,8 @@
 -export([require/1]).
 -export([log/4]).
 
+-include("log.hrl").
+
 -deprecated([start_listener/6, child_spec/6, accept_ack/1]).
 
 -type max_conns() :: non_neg_integer() | infinity.
@@ -84,6 +86,18 @@ start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
 		false ->
 			{error, badarg};
 		true ->
+			%% 
+			Spec = child_spec(Ref, Transport, TransOpts, Protocol, ProtoOpts),
+			?LOG(Spec),
+			% {{ranch_listener_sup,tcp_echo},
+			% 	 {ranch_listener_sup,start_link,
+			% 	                     [tcp_echo,ranch_tcp,
+			% 	                      #{socket_opts => [{port,5678}]},
+			% 	                      test_handler,[]]},
+			% 	 permanent,infinity,supervisor,
+			% 	 [ranch_listener_sup]}
+			%% 从日志可以看出，此处在 ranch_sup 下动态启动了另一个 supervisor {ranch_listener_sup}
+
 			Res = supervisor:start_child(ranch_sup, child_spec(Ref,
 					Transport, TransOpts, Protocol, ProtoOpts)),
 			Socket = maps:get(socket, TransOpts, undefined),
