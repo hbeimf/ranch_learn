@@ -16,6 +16,7 @@
 
 -export([start_link/4]).
 -export([loop/4]).
+-include("log.hrl").
 
 -spec start_link(inet:socket(), module(), module(), pid())
 	-> {ok, pid()}.
