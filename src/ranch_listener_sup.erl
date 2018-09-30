@@ -18,9 +18,13 @@
 -export([start_link/5]).
 -export([init/1]).
 
+-include("log.hrl").
+
 -spec start_link(ranch:ref(), module(), any(), module(), any())
 	-> {ok, pid()}.
 start_link(Ref, Transport, TransOpts, Protocol, ProtoOpts) ->
+	%% 服务器允许的最大连接数， 这里是个坑呀 ， 因为默认值给的太小了，才1024, 
+	%% 我觉得给至少也得给个十万，百万吧， 才不会坑了不知道这个的人， ^_^,  拒绝连接 
 	MaxConns = maps:get(max_connections, TransOpts, 1024),
 	ranch_server:set_new_listener_opts(Ref, MaxConns, TransOpts, ProtoOpts,
 		[Ref, Transport, TransOpts, Protocol, ProtoOpts]),
@@ -38,4 +42,17 @@ init({Ref, Transport, Protocol}) ->
 				[Ref, Transport]},
 			permanent, infinity, supervisor, [ranch_acceptors_sup]}
 	],
+
+	?LOG(ChildSpecs),
+	% ==========log========{ranch_listener_sup,46}==============
+	% [{ranch_conns_sup,{ranch_conns_sup,start_link,
+	%                                    [tcp_echo,ranch_tcp,test_handler]},
+	%                   permanent,infinity,supervisor,
+	%                   [ranch_conns_sup]},
+	%  {ranch_acceptors_sup,{ranch_acceptors_sup,start_link,[tcp_echo,ranch_tcp]},
+	%                       permanent,infinity,supervisor,
+	%                       [ranch_acceptors_sup]}]
+
+	%% 从此处看来，又启动了两个子 supervisor 
+
 	{ok, {{rest_for_one, 1, 5}, ChildSpecs}}.
