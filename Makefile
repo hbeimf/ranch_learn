@@ -44,3 +44,8 @@ DIALYZER_OPTS += --src -r test
 
 ci-setup:: $(DEPS_DIR)/ct_helper
 	$(gen_verbose) cp ~/.kerl/builds/$(CI_OTP_RELEASE)/otp_src_git/lib/ssl/test/erl_make_certs.erl deps/ct_helper/src/ || true
+
+
+
+run:: 
+	erl -pa ./ebin -s test start

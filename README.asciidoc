@@ -36,3 +36,11 @@ to close any of the currently opened sockets.
 * Official IRC Channel: #ninenines on irc.freenode.net
 * https://github.com/ninenines/ranch/issues[Issues tracker]
 * https://ninenines.eu/services[Commercial Support]
+
+
+```
+	$make 
+	$make run 
+	$ telnet localhost 5678
+
+```

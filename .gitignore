@@ -13,3 +13,4 @@ examples/*/*.d
 examples/*/_rel
 logs
 test/*.beam
+erl_crash.dump
